@@ -77,7 +77,7 @@ public class TestInsertionOrderSplayTreeWithSize {
     found = tree.find(5);
     System.err.println(tree.printTree("found " + found.key + " at " + 5));
 
-    for (int i = 0; i < tree.size; i++) {
+    for (int i = 0; i < tree.size(); i++) {
       found = tree.find(i);
       System.err.println("found " + found.key + " at " + i);
     }
@@ -85,11 +85,73 @@ public class TestInsertionOrderSplayTreeWithSize {
     tree.splay("C");
     System.err.println(tree.printTree("Splayed C"));
 
-    for (int i = 0; i < tree.size; i++) {
+    for (int i = 0; i < tree.size(); i++) {
       found = tree.find(i);
       System.err.println("found " + found.key + " at " + i);
     }
 
     tree.validate();
+  }
+
+  @Test
+  public void testSplitToPair() {
+    tree = InsertionOrderSplayTreeWithSize.create();
+    for (char c = 'A'; c <= 'Z'; c++) {
+      tree.append("" + c);
+    }
+    System.err.println(tree.printTree());
+
+    Pair<InsertionOrderSplayTreeWithSize<String>> pair =
+        InsertionOrderSplayTreeWithSize.split(tree, "M");
+    System.err.println(pair.first.printTree());
+
+    pair.first.validate();
+
+    System.err.println(pair.second.printTree());
+
+    pair.second.validate();
+  }
+
+  @Test
+  public void testSplit() {
+    tree = InsertionOrderSplayTreeWithSize.create();
+    for (char c = 'A'; c <= 'Z'; c++) {
+      tree.append("" + c);
+    }
+    System.err.println(tree.printTree());
+
+    InsertionOrderSplayTreeWithSize<String> newTree = tree.split("M");
+    System.err.println(newTree.printTree());
+
+    newTree.validate();
+
+    System.err.println(tree.printTree());
+    tree.validate();
+  }
+
+  @Test
+  public void testSplits() {
+
+    for (int i = 0; i < 20; i++) {
+      tree = InsertionOrderSplayTreeWithSize.create();
+      for (char c = 'A'; c <= 'Z'; c++) {
+        tree.append("" + c);
+      }
+      System.err.println(tree.printTree());
+
+      int splitPoint = (int) (Math.random() * tree.size());
+      InsertionOrderSplayTreeWithSize<String> newTree = tree.split(splitPoint);
+      System.err.println("split at " + splitPoint);
+      System.err.println("newTree size: " + newTree.size());
+      System.err.println(newTree.printTree());
+
+      newTree.validate();
+      System.err.println("tree size: " + tree.size());
+      System.err.println(tree.printTree());
+      System.err.println(
+          "__________________________________________________________________________");
+
+      tree.validate();
+    }
   }
 }

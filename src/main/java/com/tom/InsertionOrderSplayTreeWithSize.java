@@ -1,5 +1,9 @@
 package com.tom;
 
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.NoSuchElementException;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,7 +59,7 @@ public class InsertionOrderSplayTreeWithSize<T> {
 
   Node<T> root;
 
-  int size;
+  //  int size;
 
   public static <T> InsertionOrderSplayTreeWithSize<T> create() {
     return new InsertionOrderSplayTreeWithSize<>();
@@ -205,13 +209,13 @@ public class InsertionOrderSplayTreeWithSize<T> {
     Node<T> max = max();
     splay(max);
 
-    System.err.println(printTree("Appending " + key));
+    //    System.err.println(printTree("Appending " + key));
 
     max.right = z;
     max.size += z.size;
     z.parent = max;
-    System.err.println(printTree("Appended " + key));
-    size++;
+    //    System.err.println(printTree("Appended " + key));
+    //    size++;
   }
 
   public static <T extends Comparable<T>> void join(
@@ -232,10 +236,43 @@ public class InsertionOrderSplayTreeWithSize<T> {
   public InsertionOrderSplayTreeWithSize<T> split(T key) {
     // split off the right side of key
     Node<T> node = find(key);
+    splay(node);
+    System.err.println(printTree());
+    // root should be the found node
+
+    node.right.parent = null;
     InsertionOrderSplayTreeWithSize<T> splitter =
         InsertionOrderSplayTreeWithSize.create(node.right);
     node.right = null;
     return splitter;
+  }
+
+  public InsertionOrderSplayTreeWithSize<T> split(int position) {
+    Node<T> found = find(position);
+    if (found != null) {
+      splay(found);
+      // split off the right side of key
+      found.right.parent = null;
+      InsertionOrderSplayTreeWithSize<T> splitter =
+          InsertionOrderSplayTreeWithSize.create(found.right);
+      found.size -= found.right.size;
+      found.right = null;
+
+      //      if (root != null && root.parent != null) {
+      //        log.error("root has a parent");
+      //      }
+      //      this.count();
+      //      if (found.right != null && found.right.parent != null) {
+      //        log.error("found.right has a parent");
+      //      }
+      //      this.updateSize();
+      validate();
+      //      splitter.count();
+      //      splitter.updateSize();
+      return splitter;
+    }
+    return InsertionOrderSplayTreeWithSize
+        .create(); // return empty 'right' tree and leave tree alone
   }
 
   public Node<T> find(int k) {
@@ -260,6 +297,9 @@ public class InsertionOrderSplayTreeWithSize<T> {
       InsertionOrderSplayTreeWithSize<T> tree, T key) {
     // assume we find key
     Node<T> node = tree.find(key);
+    tree.splay(node);
+    node.left.parent = null;
+    node.right.parent = null;
     return Pair.of(
         InsertionOrderSplayTreeWithSize.create(node.left),
         InsertionOrderSplayTreeWithSize.create(node.right));
@@ -291,7 +331,7 @@ public class InsertionOrderSplayTreeWithSize<T> {
 
   private Node<T> find(Node<T> from, T node) {
     if (from == null) return null;
-    if (from.key == node) return from;
+    if (from != null && from.key.equals(node)) return from;
     Node<T> found = find(from.left, node);
     if (found != null) {
       return found;
@@ -325,11 +365,11 @@ public class InsertionOrderSplayTreeWithSize<T> {
       y.left.parent = y;
     }
 
-    size--;
+    //    size--;
   }
 
   public int size() {
-    return size;
+    return root != null ? root.size : 0;
   }
 
   public int height() {
@@ -384,6 +424,63 @@ public class InsertionOrderSplayTreeWithSize<T> {
       }
       validateChild(node.left);
       validateChild(node.right);
+    }
+  }
+
+  //  void updateSize() {
+  //    size = 0;
+  //    for (TreeIterator<T> iterator = new TreeIterator<>(root); iterator.hasNext(); iterator.next()) {
+  //      size++;
+  //    }
+  //  }
+
+  public static class TreeIterator<V> implements Iterator<Node<V>> {
+
+    private Node<V> next;
+    Set<Node<V>> elements = new LinkedHashSet<>();
+
+    public TreeIterator(Node<V> root) {
+      this.next = root;
+      if (next == null) return;
+
+      while (next.left != null) {
+        if (elements.contains(next.left)) {
+          throw new RuntimeException("duplicate elements");
+        }
+        elements.add(next.left);
+        next = next.left;
+      }
+    }
+
+    @Override
+    public boolean hasNext() {
+      return next != null;
+    }
+
+    @Override
+    public Node<V> next() {
+      if (!hasNext()) throw new NoSuchElementException();
+      Node<V> r = next;
+
+      // If you can walk right, walk right, then fully left.
+      // otherwise, walk up until you come from left.
+      if (next.right != null) {
+        next = next.right;
+        while (next.left != null) next = next.left;
+        return r;
+      }
+
+      while (true) {
+        if (next.parent == null) {
+          next = null;
+          return r;
+        }
+        if (next.parent.left == next) {
+          next = next.parent;
+          return r;
+        }
+        next = next.parent;
+      }
     }
   }
 }
