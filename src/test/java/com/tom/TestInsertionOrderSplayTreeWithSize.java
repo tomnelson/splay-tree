@@ -1,77 +1,77 @@
 package com.tom;
 
-import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TestSplayTreeWithSize {
+public class TestInsertionOrderSplayTreeWithSize {
 
-  private static final Logger log = LoggerFactory.getLogger(TestSplayTreeWithSize.class);
+  private static final Logger log =
+      LoggerFactory.getLogger(TestInsertionOrderSplayTreeWithSize.class);
 
-  SplayTreeWithSize<String> tree;
+  InsertionOrderSplayTreeWithSize<String> tree;
 
   String[] values = new String[] {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J"};
 
   @Before
   public void setup() {
-    tree = SplayTreeWithSize.create();
-    Arrays.stream(values).forEach(tree::insert);
+    //    tree = InsertionOrderSplayTreeWithSize.create();
+    //    Arrays.stream(values).forEach(tree::append);
   }
 
   @Test
   public void testSmallContainer() {
     // make a Container and add all the nodes
-    tree = SplayTreeWithSize.create();
-    tree.insert("A");
+    tree = InsertionOrderSplayTreeWithSize.create();
+    tree.append("A");
     System.err.println(tree.printTree("Appended A"));
-    //    SplayTreeWithSizePrinter.print(tree);
-    tree.insert("B");
+    //    InsertionOrderSplayTreeWithSizePrinter.print(tree);
+    tree.append("B");
     System.err.println(tree.printTree("Appended B"));
-    //    SplayTreeWithSizePrinter.print(tree);
-    tree.insert("C");
+    //    InsertionOrderSplayTreeWithSizePrinter.print(tree);
+    tree.append("C");
     System.err.println(tree.printTree("Appended C"));
-    //    SplayTreeWithSizePrinter.print(tree);
-    //    tree.insert("D");
+    //    InsertionOrderSplayTreeWithSizePrinter.print(tree);
+    //    tree.append("D");
     //    System.err.println(tree.printTree("Appended D"));
-    //    SplayTreeWithSizePrinter.print(tree);
-    tree.insert("E");
+    //    InsertionOrderSplayTreeWithSizePrinter.print(tree);
+    tree.append("E");
     System.err.println(tree.printTree("Appended E"));
-    //    SplayTreeWithSizePrinter.print(tree);
-    tree.insert("F");
+    //    InsertionOrderSplayTreeWithSizePrinter.print(tree);
+    tree.append("F");
     System.err.println(tree.printTree("Appended F"));
-    //    SplayTreeWithSizePrinter.print(tree);
+    //    InsertionOrderSplayTreeWithSizePrinter.print(tree);
 
     tree.splay("D");
     System.err.println(tree.printTree("Splayed D"));
-    //    SplayTreeWithSizePrinter.print(tree);
+    //    InsertionOrderSplayTreeWithSizePrinter.print(tree);
     tree.splay("C");
     System.err.println(tree.printTree("Splayed C"));
-    //    SplayTreeWithSizePrinter.print(tree);
+    //    InsertionOrderSplayTreeWithSizePrinter.print(tree);
     tree.splay("B");
     System.err.println(tree.printTree("Splayed B"));
-    //    SplayTreeWithSizePrinter.print(tree);
+    //    InsertionOrderSplayTreeWithSizePrinter.print(tree);
     tree.splay("A");
     System.err.println(tree.printTree("Splayed A"));
-    //    SplayTreeWithSizePrinter.print(tree);
+    //    InsertionOrderSplayTreeWithSizePrinter.print(tree);
 
     tree.splay("C");
     System.err.println(tree.printTree("Splayed C"));
-    //    SplayTreeWithSizePrinter.print(tree);
+    //    InsertionOrderSplayTreeWithSizePrinter.print(tree);
 
-    tree.insert("D");
-    System.err.println(tree.printTree("Inserted D"));
+    tree.append("D");
+    System.err.println(tree.printTree("Appended D"));
 
     tree.append("H");
-    //    tree.insert("H");
+    //    tree.append("H");
     System.err.println(tree.printTree("Appended H"));
 
     tree.append("G");
-    //    tree.insert("H");
+    //    tree.append("H");
     System.err.println(tree.printTree("Appended G"));
 
-    SplayTreeWithSize.Node<String> found = tree.find(3);
+    InsertionOrderSplayTreeWithSize.Node<String> found = tree.find(3);
     System.err.println(tree.printTree("found " + found.key + " at " + 3));
 
     found = tree.find(5);

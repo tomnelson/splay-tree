@@ -22,13 +22,6 @@ public class TestSplayTree {
 
   @Test
   public void testSmallContainer() {
-    // make some nodes
-    SplayTree.Node<String> nodeA = new SplayTree.Node("A");
-    SplayTree.Node<String> nodeB = new SplayTree.Node("B");
-    SplayTree.Node<String> nodeC = new SplayTree.Node("C");
-    SplayTree.Node<String> nodeD = new SplayTree.Node("D");
-    SplayTree.Node<String> nodeE = new SplayTree.Node("E");
-    SplayTree.Node<String> nodeF = new SplayTree.Node("F");
     // make a Container and add all the nodes
     tree = SplayTree.create();
     tree.insert("A");
@@ -66,5 +59,7 @@ public class TestSplayTree {
     tree.splay("C");
     System.err.println(tree.printTree("Splayed C"));
     //    SplayTreePrinter.print(tree);
+
+    tree.validate();
   }
 }

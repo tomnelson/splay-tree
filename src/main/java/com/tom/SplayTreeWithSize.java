@@ -26,6 +26,38 @@ public class SplayTreeWithSize<T extends Comparable<T>> {
     public int compareTo(Node<T> other) {
       return key.compareTo(other.key);
     }
+
+    public int size() {
+      return this.size;
+    }
+
+    int count() {
+      int leftCount = left != null ? left.count() : 0;
+      int rightCount = right != null ? right.count() : 0;
+      int count = 1 + leftCount + rightCount;
+      return count;
+    }
+
+    /** validate a node */
+    public void validate() {
+      if (this == left) {
+        throw new RuntimeException("this == left");
+      }
+      if (this == right) {
+        throw new RuntimeException("this == right");
+      }
+      if (this == this.parent) {
+        throw new RuntimeException("node is its own parent");
+      }
+      if (left != null && left == right) {
+        throw new RuntimeException("children match");
+      }
+      if (parent != null) {
+        if (parent.left != this && parent.right != this) {
+          throw new RuntimeException("parent child mismatch");
+        }
+      }
+    }
   }
 
   Node<T> root;
@@ -130,6 +162,34 @@ public class SplayTreeWithSize<T extends Comparable<T>> {
 
   }
 
+  static <T extends Comparable<T>> Node<T> p(Node<T> node) {
+    return node.parent;
+  }
+
+  static <T extends Comparable<T>> int size(Node<T> node) {
+    return node != null ? node.size() : 0;
+  }
+
+  static <T extends Comparable<T>> Node<T> l(Node<T> node) {
+    return node.left;
+  }
+
+  static <T extends Comparable<T>> Node<T> r(Node<T> node) {
+    return node.right;
+  }
+
+  public int pos(Node<T> node) {
+    if (node == root) {
+      return size(l(node));
+    } else if (r(p(node)) == node) { // node is a right child
+      return pos(p(node)) + size(l(node)) + 1;
+    } else if (l(p(node)) == node) { // node is a left child
+      return pos(p(node)) - size(r(node)) - 1;
+    } else {
+      return -1;
+    }
+  }
+
   void replace(Node<T> u, Node<T> v) {
     if (null == u.parent) root = v;
     else if (u == u.parent.left) u.parent.left = v;
@@ -184,6 +244,7 @@ public class SplayTreeWithSize<T extends Comparable<T>> {
     }
 
     splay(z);
+    size++;
   }
 
   public void append(T key) {
@@ -199,6 +260,7 @@ public class SplayTreeWithSize<T extends Comparable<T>> {
     max.size += z.size;
     z.parent = max;
     System.err.println(printTree("Appended " + key));
+    size++;
   }
 
   public static <T extends Comparable<T>> void join(Pair<SplayTreeWithSize<T>> trees) {
@@ -229,6 +291,24 @@ public class SplayTreeWithSize<T extends Comparable<T>> {
     SplayTreeWithSize<T> splitter = SplayTreeWithSize.create(node.right);
     node.right = null;
     return splitter;
+  }
+
+  public Node<T> find(int k) {
+    return find(root, k);
+  }
+
+  Node<T> find(Node<T> node, int k) {
+    if (node == null) return null;
+    int pos = pos(node);
+
+    if (pos == k) {
+      return node;
+    }
+    if (pos < k) {
+      return find(node.right, k);
+    } else {
+      return find(node.left, k);
+    }
   }
 
   public static <T extends Comparable<T>> Pair<SplayTreeWithSize<T>> split(
@@ -317,5 +397,33 @@ public class SplayTreeWithSize<T extends Comparable<T>> {
 
   public String printTree(String note) {
     return note + "\n" + printTree(root, 0);
+  }
+
+  public void validate() {
+    // root parent is null
+    if (root != null && root.parent != null) {
+      throw new RuntimeException("root parent is not null");
+    }
+    root.validate();
+    validateChild(root.left);
+    validateChild(root.right);
+  }
+
+  /**
+   * validate a node
+   *
+   * @param node
+   */
+  private void validateChild(Node<T> node) {
+    if (node == null) return;
+    node.validate();
+    if (node.parent == null) {
+      throw new RuntimeException("child has null parent");
+    }
+    if (node.size != node.count()) {
+      throw new RuntimeException("size does not match count");
+    }
+    validateChild(node.left);
+    validateChild(node.right);
   }
 }

@@ -2,6 +2,11 @@ package com.tom;
 
 import java.util.Objects;
 
+/**
+ * A holder for the return of 2 SplayTree(s) when one is split
+ *
+ * @param <V>
+ */
 public class Pair<V> {
   public final V first;
   public final V second;

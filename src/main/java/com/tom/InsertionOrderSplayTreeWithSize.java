@@ -3,23 +3,41 @@ package com.tom;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SplayTree<T extends Comparable<T>> {
+/**
+ * A splay tree for items that are not comparable. There is no 'insert' method, any new item is
+ * appended to the left side of the SplayTree by first finding the 'max' (farthest right), splaying
+ * to it, and adding the new Node as its right child
+ *
+ * @param <T>
+ */
+public class InsertionOrderSplayTreeWithSize<T> {
 
-  private static final Logger log = LoggerFactory.getLogger(SplayTree.class);
+  private static final Logger log = LoggerFactory.getLogger(InsertionOrderSplayTreeWithSize.class);
 
-  public static class Node<T extends Comparable<T>> implements Comparable<Node<T>> {
+  static <T> int nodeSize(Node<T> node) {
+    return node == null ? 0 : node.size;
+  }
+
+  public static class Node<T> {
     T key;
     Node<T> parent;
     Node<T> left;
     Node<T> right;
+    int size;
 
     public Node(T key) {
       this.key = key;
     }
 
-    @Override
-    public int compareTo(Node<T> other) {
-      return key.compareTo(other.key);
+    public int size() {
+      return this.size;
+    }
+
+    int count() {
+      int leftCount = left != null ? left.count() : 0;
+      int rightCount = right != null ? right.count() : 0;
+      int count = 1 + leftCount + rightCount;
+      return count;
     }
 
     public void validate() {
@@ -39,17 +57,17 @@ public class SplayTree<T extends Comparable<T>> {
 
   int size;
 
-  public static <T extends Comparable<T>> SplayTree<T> create() {
-    return new SplayTree<>();
+  public static <T> InsertionOrderSplayTreeWithSize<T> create() {
+    return new InsertionOrderSplayTreeWithSize<>();
   }
 
-  public static <T extends Comparable<T>> SplayTree<T> create(Node<T> root) {
-    return new SplayTree<>(root);
+  public static <T> InsertionOrderSplayTreeWithSize<T> create(Node<T> root) {
+    return new InsertionOrderSplayTreeWithSize<>(root);
   }
 
-  private SplayTree() {}
+  private InsertionOrderSplayTreeWithSize() {}
 
-  private SplayTree(Node<T> root) {
+  private InsertionOrderSplayTreeWithSize(Node<T> root) {
     this.root = root;
   }
 
@@ -65,6 +83,9 @@ public class SplayTree<T extends Comparable<T>> {
     else if (x == x.parent.left) x.parent.left = y;
     else x.parent.right = y;
     if (y != null) y.left = x;
+
+    x.size = nodeSize(x.left) + nodeSize(x.right) + 1;
+
     x.parent = y;
   }
 
@@ -79,6 +100,9 @@ public class SplayTree<T extends Comparable<T>> {
     else if (x == x.parent.left) x.parent.left = y;
     else x.parent.right = y;
     if (y != null) y.right = x;
+
+    x.size = nodeSize(x.left) + nodeSize(x.right) + 1;
+
     x.parent = y;
   }
 
@@ -90,6 +114,10 @@ public class SplayTree<T extends Comparable<T>> {
   }
 
   public void splay(Node<T> x) {
+    int rootSize = nodeSize(root);
+    int leftSize = 0;
+    int rightSize = 0;
+
     while (x.parent != null) {
       if (null == x.parent.parent) {
         if (x.parent.left == x) rightRotate(x.parent);
@@ -107,6 +135,38 @@ public class SplayTree<T extends Comparable<T>> {
         leftRotate(x.parent);
         rightRotate(x.parent);
       }
+    }
+
+    leftSize += nodeSize(root.left); /* Now l_size and r_size are the sizes of */
+    rightSize += nodeSize(root.right); /* the left and right trees we just built.*/
+    root.size = leftSize + rightSize + 1;
+  }
+
+  static <T> Node<T> p(Node<T> node) {
+    return node.parent;
+  }
+
+  static <T> int size(Node<T> node) {
+    return node != null ? node.size() : 0;
+  }
+
+  static <T> Node<T> l(Node<T> node) {
+    return node.left;
+  }
+
+  static <T> Node<T> r(Node<T> node) {
+    return node.right;
+  }
+
+  public int pos(Node<T> node) {
+    if (node == root) {
+      return size(l(node));
+    } else if (r(p(node)) == node) { // node is a right child
+      return pos(p(node)) + size(l(node)) + 1;
+    } else if (l(p(node)) == node) { // node is a left child
+      return pos(p(node)) - size(r(node)) - 1;
+    } else {
+      return -1;
     }
   }
 
@@ -135,84 +195,114 @@ public class SplayTree<T extends Comparable<T>> {
     return subtree_minimum(root);
   }
 
-  public void insert(T key) {
-    Node<T> z = root;
-    Node<T> p = null;
-
-    while (z != null) {
-      p = z;
-      if (comp(z.key, key)) z = z.right;
-      else z = z.left;
+  public void append(T key) {
+    Node<T> z = new Node<>(key);
+    z.size = 1;
+    if (root == null) {
+      root = z;
+      return;
     }
+    Node<T> max = max();
+    splay(max);
 
-    z = new Node<>(key);
-    z.parent = p;
+    System.err.println(printTree("Appending " + key));
 
-    if (null == p) root = z;
-    else if (comp(p.key, z.key)) p.right = z;
-    else p.left = z;
-
-    splay(z);
+    max.right = z;
+    max.size += z.size;
+    z.parent = max;
+    System.err.println(printTree("Appended " + key));
     size++;
   }
 
-  public static <T extends Comparable<T>> void join(Pair<SplayTree<T>> trees) {
+  public static <T extends Comparable<T>> void join(
+      Pair<InsertionOrderSplayTreeWithSize<T>> trees) {
     // find my largest item
-    // assert that the max of left is smaller than the min of right
-    if (!comp(trees.first.max(), trees.second.min())) {
-      throw new IllegalArgumentException();
-    }
     Node<T> largest = trees.first.max();
     trees.first.splay(largest);
     trees.first.root.right = trees.second.root;
   }
 
-  public void join(SplayTree<T> joiner) {
+  public void join(InsertionOrderSplayTreeWithSize<T> joiner) {
     log.info("max:{}, joiner min: {}", max().key, joiner.min().key);
-    log.info("comp is {}", comp(max(), joiner.min()));
-    if (!comp(max(), joiner.min())) {
-      throw new IllegalArgumentException();
-    }
     Node<T> largest = max();
     splay(largest);
     root.right = joiner.root;
   }
 
-  public SplayTree<T> split(T key) {
+  public InsertionOrderSplayTreeWithSize<T> split(T key) {
     // split off the right side of key
     Node<T> node = find(key);
-    SplayTree<T> splitter = SplayTree.create(node.right);
+    InsertionOrderSplayTreeWithSize<T> splitter =
+        InsertionOrderSplayTreeWithSize.create(node.right);
     node.right = null;
     return splitter;
   }
 
-  public static <T extends Comparable<T>> Pair<SplayTree<T>> split(SplayTree<T> tree, T key) {
+  public Node<T> find(int k) {
+    return find(root, k);
+  }
+
+  Node<T> find(Node<T> node, int k) {
+    if (node == null) return null;
+    int pos = pos(node);
+
+    if (pos == k) {
+      return node;
+    }
+    if (pos < k) {
+      return find(node.right, k);
+    } else {
+      return find(node.left, k);
+    }
+  }
+
+  public static <T extends Comparable<T>> Pair<InsertionOrderSplayTreeWithSize<T>> split(
+      InsertionOrderSplayTreeWithSize<T> tree, T key) {
     // assume we find key
     Node<T> node = tree.find(key);
-    return Pair.of(SplayTree.create(node.left), SplayTree.create(node.right));
+    return Pair.of(
+        InsertionOrderSplayTreeWithSize.create(node.left),
+        InsertionOrderSplayTreeWithSize.create(node.right));
+  }
+
+  public Node<T> find(Node<T> node) {
+    return find(root, node);
+  }
+
+  private Node<T> find(Node<T> from, Node<T> node) {
+    if (from == null) return null;
+    if (from == node) return from;
+    Node<T> found = find(from.left, node);
+    if (found != null) {
+      return found;
+    } else {
+      found = find(from.right, node);
+      if (found != null) {
+        return found;
+      } else {
+        return null;
+      }
+    }
   }
 
   public Node<T> find(T key) {
-    Node<T> z = root;
-    while (z != null) {
-      if (comp(z.key, key)) z = z.right;
-      else if (comp(key, z.key)) z = z.left;
-      else return z;
-    }
-    return null;
+    return find(root, key);
   }
 
-  public Node<T> findSplay(T key) {
-    Node<T> z = root;
-    while (z != null) {
-      if (comp(z.key, key)) z = z.right;
-      else if (comp(key, z.key)) z = z.left;
-      else {
-        splay(z);
-        return z;
+  private Node<T> find(Node<T> from, T node) {
+    if (from == null) return null;
+    if (from.key == node) return from;
+    Node<T> found = find(from.left, node);
+    if (found != null) {
+      return found;
+    } else {
+      found = find(from.right, node);
+      if (found != null) {
+        return found;
+      } else {
+        return null;
       }
     }
-    return null;
   }
 
   public void erase(T key) {
@@ -246,7 +336,7 @@ public class SplayTree<T extends Comparable<T>> {
     return height(root);
   }
 
-  public static <T extends Comparable<T>> int height(Node<T> node) {
+  public static <T> int height(Node<T> node) {
     return node != null ? 1 + Math.max(height(node.left), height(node.right)) : 0;
   }
 
@@ -264,7 +354,7 @@ public class SplayTree<T extends Comparable<T>> {
     if (node == null) return "";
     builder.append(printTree(node.right, d + 1));
     for (i = 0; i < d; i++) builder.append("  ");
-    builder.append(node.key + "(" + 0 + ")\n");
+    builder.append(node.key + "(" + node.size + ")\n");
     builder.append(printTree(node.left, d + 1));
     return builder.toString();
   }
@@ -288,6 +378,9 @@ public class SplayTree<T extends Comparable<T>> {
       node.validate();
       if (node.parent == null) {
         throw new RuntimeException("child has null parent");
+      }
+      if (node.size != node.count()) {
+        throw new RuntimeException("size does not match count");
       }
       validateChild(node.left);
       validateChild(node.right);

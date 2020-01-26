@@ -3,6 +3,8 @@ package com.tom;
 /**
  * Implements a top-down splay tree. Available at http://www.link.cs.cmu.edu/splay/ Author: Danny
  * Sleator <sleator@cs.cmu.edu> This code is in the public domain.
+ *
+ * <p>Tom added the size attribute based on Sleator's C version of the same top down splay tree
  */
 public class TopDownSplayTree<T extends Comparable<T>> {
 
@@ -19,6 +21,15 @@ public class TopDownSplayTree<T extends Comparable<T>> {
 
     public int size() {
       return size;
+    }
+
+    public void validate() {
+      if (this == left) {
+        throw new RuntimeException("this == left");
+      }
+      if (left != null && left == right) {
+        throw new RuntimeException("children match");
+      }
     }
   }
 
@@ -188,29 +199,6 @@ public class TopDownSplayTree<T extends Comparable<T>> {
     }
   }
 
-  //    public Node<T> find(int k) {
-  //        return find(root, k);
-  //    }
-
-  //    Node<T> find(Node<T> node, int k) {
-  //        if (node == null) return null;
-  //        int pos = pos(node);
-  //
-  //        if (pos == k) {
-  //            return node;
-  //        }
-  //        if (pos < k) {
-  //            return find(node.right, k);
-  //        } else {
-  //            return find(node.left, k);
-  //        }
-  //        //
-  //        //    int t = segment.left != null ? segment.left.size() : 0;
-  //        //    if (t > k) return find(segment.left, k);
-  //        //    else if (t < k) return find(segment.right, k - t - 1);
-  //        //    else return segment;
-  //    }
-
   /** this method just illustrates the top-down method of implementing the move-to-root operation */
   private void moveToRoot(T key) {
     Node<T> l, r, t, y;
@@ -336,6 +324,21 @@ public class TopDownSplayTree<T extends Comparable<T>> {
 
   public String printTree(String note) {
     return note + "\n" + printTree(root, 0);
+  }
+
+  public void validate() {
+    // root parent is null
+    root.validate();
+    validateChild(root.left);
+    validateChild(root.right);
+  }
+
+  private void validateChild(Node<T> node) {
+    if (node != null) {
+      node.validate();
+      validateChild(node.left);
+      validateChild(node.right);
+    }
   }
 
   // test code stolen from Weiss
