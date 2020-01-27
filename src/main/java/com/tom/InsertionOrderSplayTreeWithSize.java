@@ -227,10 +227,16 @@ public class InsertionOrderSplayTreeWithSize<T> {
   }
 
   public void join(InsertionOrderSplayTreeWithSize<T> joiner) {
-    log.info("max:{}, joiner min: {}", max().key, joiner.min().key);
+    //    log.info("max:{}, joiner min: {}", max().key, joiner.min().key);
     Node<T> largest = max();
     splay(largest);
     root.right = joiner.root;
+    if (joiner.root != null) {
+      joiner.root.parent = root;
+      root.size += joiner.root.size;
+    } else {
+      System.err.println("joiner root is null");
+    }
   }
 
   public InsertionOrderSplayTreeWithSize<T> split(T key) {
@@ -252,10 +258,12 @@ public class InsertionOrderSplayTreeWithSize<T> {
     if (found != null) {
       splay(found);
       // split off the right side of key
-      found.right.parent = null;
+      if (found.right != null) {
+        found.right.parent = null;
+        found.size -= found.right.size;
+      }
       InsertionOrderSplayTreeWithSize<T> splitter =
           InsertionOrderSplayTreeWithSize.create(found.right);
-      found.size -= found.right.size;
       found.right = null;
 
       //      if (root != null && root.parent != null) {
@@ -405,12 +413,14 @@ public class InsertionOrderSplayTreeWithSize<T> {
 
   public void validate() {
     // root parent is null
-    if (root != null && root.parent != null) {
-      throw new RuntimeException("root parent is not null");
+    if (root != null) {
+      if (root.parent != null) {
+        throw new RuntimeException("root parent is not null");
+      }
+      root.validate();
+      validateChild(root.left);
+      validateChild(root.right);
     }
-    root.validate();
-    validateChild(root.left);
-    validateChild(root.right);
   }
 
   private void validateChild(Node<T> node) {

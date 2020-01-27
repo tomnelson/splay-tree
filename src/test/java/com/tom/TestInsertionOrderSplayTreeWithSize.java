@@ -118,40 +118,74 @@ public class TestInsertionOrderSplayTreeWithSize {
     for (char c = 'A'; c <= 'Z'; c++) {
       tree.append("" + c);
     }
-    System.err.println(tree.printTree());
+    System.err.println(tree.printTree("starting tree"));
 
     InsertionOrderSplayTreeWithSize<String> newTree = tree.split("M");
-    System.err.println(newTree.printTree());
+    System.err.println(newTree.printTree("split off tree"));
 
     newTree.validate();
 
-    System.err.println(tree.printTree());
+    System.err.println(tree.printTree("tree after split"));
+    tree.validate();
+
+    tree.join(newTree);
+    System.err.println(tree.printTree("Joined Tree"));
     tree.validate();
   }
 
+  /**
+   * create a tree of 26 upper-case characters randomly split and join the tree at different
+   * locations validate the split and re-joined tree
+   */
   @Test
   public void testSplits() {
 
+    tree = InsertionOrderSplayTreeWithSize.create();
+    for (char c = 'A'; c <= 'Z'; c++) {
+      tree.append("" + c);
+    }
+    System.err.println(tree.printTree());
     for (int i = 0; i < 20; i++) {
-      tree = InsertionOrderSplayTreeWithSize.create();
-      for (char c = 'A'; c <= 'Z'; c++) {
-        tree.append("" + c);
-      }
-      System.err.println(tree.printTree());
-
       int splitPoint = (int) (Math.random() * tree.size());
-      InsertionOrderSplayTreeWithSize<String> newTree = tree.split(splitPoint);
+      InsertionOrderSplayTreeWithSize<String> splitter = tree.split(splitPoint);
       System.err.println("split at " + splitPoint);
-      System.err.println("newTree size: " + newTree.size());
-      System.err.println(newTree.printTree());
+      System.err.println("newTree size: " + splitter.size());
+      System.err.println(splitter.printTree("split off tree"));
 
-      newTree.validate();
+      splitter.validate();
       System.err.println("tree size: " + tree.size());
-      System.err.println(tree.printTree());
+      System.err.println(tree.printTree("tree after split"));
       System.err.println(
           "__________________________________________________________________________");
 
       tree.validate();
+
+      tree.join(splitter);
+      System.err.println(tree.printTree("Joined Tree"));
+      tree.validate();
     }
+
+    // also split/join at 0 and 26
+    int[] splitPoints = new int[] {0, 26};
+    for (int i : splitPoints) {
+      InsertionOrderSplayTreeWithSize<String> splitter = tree.split(i);
+      System.err.println("split at " + i);
+      System.err.println("newTree size: " + splitter.size());
+      System.err.println(splitter.printTree("split off tree"));
+
+      splitter.validate();
+      System.err.println("tree size: " + tree.size());
+      System.err.println(tree.printTree("tree after split"));
+      System.err.println(
+          "__________________________________________________________________________");
+
+      tree.validate();
+
+      tree.join(splitter);
+      System.err.println(tree.printTree("Joined Tree"));
+      tree.validate();
+    }
+    tree.splay("A");
+    System.err.println(tree.printTree("splayed Tree"));
   }
 }
