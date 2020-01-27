@@ -432,6 +432,8 @@ public class InsertionOrderSplayTreeWithSize<T> {
   //  }
 
   public static class TreeIterator<V> implements Iterator<Node<V>> {
+    @Override
+    public void remove() {}
 
     private Node<V> next;
     Set<Node<V>> elements = new LinkedHashSet<>();

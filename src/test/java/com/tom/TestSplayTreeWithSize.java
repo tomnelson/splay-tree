@@ -1,6 +1,9 @@
 package com.tom;
 
 import java.util.Arrays;
+import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.IntStream;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -144,8 +147,8 @@ public class TestSplayTreeWithSize {
       tree.append("" + c);
     }
     System.err.println(tree.printTree());
-    for (int i = 0; i < 20; i++) {
-      int splitPoint = (int) (Math.random() * tree.size());
+
+    for (int splitPoint : shuffledInts(0, tree.size())) {
       SplayTreeWithSize<String> splitter = tree.split(splitPoint);
       System.err.println("split at " + splitPoint);
       System.err.println("newTree size: " + splitter.size());
@@ -163,28 +166,23 @@ public class TestSplayTreeWithSize {
       System.err.println(tree.printTree("Joined Tree"));
       tree.validate();
     }
+  }
 
-    // also split/join at 0 and 26
-    int[] splitPoints = new int[] {0, 26};
-    for (int i : splitPoints) {
-      SplayTreeWithSize<String> splitter = tree.split(i);
-      System.err.println("split at " + i);
-      System.err.println("newTree size: " + splitter.size());
-      System.err.println(splitter.printTree("split off tree"));
-
-      splitter.validate();
-      System.err.println("tree size: " + tree.size());
-      System.err.println(tree.printTree("tree after split"));
-      System.err.println(
-          "__________________________________________________________________________");
-
-      tree.validate();
-
-      tree.join(splitter);
-      System.err.println(tree.printTree("Joined Tree"));
-      tree.validate();
+  // Implementing Fisher–Yates shuffle
+  static void shuffleArray(int[] ar) {
+    Random rnd = ThreadLocalRandom.current();
+    for (int i = ar.length - 1; i > 0; i--) {
+      int index = rnd.nextInt(i + 1);
+      // Simple swap
+      int a = ar[index];
+      ar[index] = ar[i];
+      ar[i] = a;
     }
-    tree.splay("A");
-    System.err.println(tree.printTree("splayed Tree"));
+  }
+
+  static int[] shuffledInts(int from, int to) {
+    int[] array = IntStream.rangeClosed(from, to).toArray();
+    shuffleArray(array);
+    return array;
   }
 }
