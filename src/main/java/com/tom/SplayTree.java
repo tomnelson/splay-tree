@@ -3,6 +3,13 @@ package com.tom;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This is the splay tree from the wiki page C++ code: https://en.wikipedia.org/wiki/Splay_tree It
+ * is a bottom-up version that stores a parent reference in the Node @TODO unit testing is
+ * incomplete
+ *
+ * @param <T>
+ */
 public class SplayTree<T extends Comparable<T>> {
 
   private static final Logger log = LoggerFactory.getLogger(SplayTree.class);

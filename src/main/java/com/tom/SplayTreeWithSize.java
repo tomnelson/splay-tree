@@ -3,6 +3,13 @@ package com.tom;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This is the SplayTree from the wiki page C++ code: https://en.wikipedia.org/wiki/Splay_tree I've
+ * added a size property to the node and the rotate methods keep it up-to-date. @TODO: add unit
+ * tests for split and join
+ *
+ * @param <T> the type of Comparable to store in the tree
+ */
 public class SplayTreeWithSize<T extends Comparable<T>> {
 
   private static final Logger log = LoggerFactory.getLogger(SplayTreeWithSize.class);
@@ -61,8 +68,6 @@ public class SplayTreeWithSize<T extends Comparable<T>> {
   }
 
   Node<T> root;
-
-  int size;
 
   public static <T extends Comparable<T>> SplayTreeWithSize<T> create() {
     return new SplayTreeWithSize<>();
@@ -147,19 +152,6 @@ public class SplayTreeWithSize<T extends Comparable<T>> {
     leftSize += nodeSize(root.left); /* Now l_size and r_size are the sizes of */
     rightSize += nodeSize(root.right); /* the left and right trees we just built.*/
     root.size = leftSize + rightSize + 1;
-
-    /* The following two loops correct the size fields of the right path  */
-    /* from the left child of the root and the right path from the left   */
-    /* child of the root.                                                 */
-    //    for (Node<T> y = root.right; y != null; y = y.right) {
-    //      y.size = leftSize;
-    //      leftSize -= 1+nodeSize(y.left);
-    //    }
-    //    for (Node<T> y = root.left; y != null; y = y.left) {
-    //      y.size = rightSize;
-    //      rightSize -= 1+nodeSize(y.right);
-    //    }
-
   }
 
   static <T extends Comparable<T>> Node<T> p(Node<T> node) {
@@ -244,12 +236,15 @@ public class SplayTreeWithSize<T extends Comparable<T>> {
     }
 
     splay(z);
-    size++;
   }
 
   public void append(T key) {
     Node<T> z = new Node<>(key);
     z.size = 1;
+    if (root == null) {
+      root = z;
+      return;
+    }
 
     Node<T> max = max();
     splay(max);
@@ -260,7 +255,6 @@ public class SplayTreeWithSize<T extends Comparable<T>> {
     max.size += z.size;
     z.parent = max;
     System.err.println(printTree("Appended " + key));
-    size++;
   }
 
   public static <T extends Comparable<T>> void join(Pair<SplayTreeWithSize<T>> trees) {
@@ -275,14 +269,15 @@ public class SplayTreeWithSize<T extends Comparable<T>> {
   }
 
   public void join(SplayTreeWithSize<T> joiner) {
-    log.info("max:{}, joiner min: {}", max().key, joiner.min().key);
-    log.info("comp is {}", comp(max(), joiner.min()));
-    if (!comp(max(), joiner.min())) {
-      throw new IllegalArgumentException();
-    }
     Node<T> largest = max();
     splay(largest);
     root.right = joiner.root;
+    if (joiner.root != null) {
+      joiner.root.parent = root;
+      root.size += joiner.root.size;
+    } else {
+      System.err.println("joiner root is null");
+    }
   }
 
   public SplayTreeWithSize<T> split(T key) {
@@ -311,10 +306,32 @@ public class SplayTreeWithSize<T extends Comparable<T>> {
     }
   }
 
+  public SplayTreeWithSize<T> split(int position) {
+    Node<T> found = find(position);
+    if (found != null) {
+      splay(found);
+      // split off the right side of key
+      if (found.right != null) {
+        found.right.parent = null;
+        found.size -= found.right.size;
+      }
+      SplayTreeWithSize<T> splitter = SplayTreeWithSize.create(found.right);
+      found.right = null;
+
+      validate();
+      return splitter;
+    }
+    return SplayTreeWithSize.create(); // return empty 'right' tree and leave tree alone
+  }
+
   public static <T extends Comparable<T>> Pair<SplayTreeWithSize<T>> split(
       SplayTreeWithSize<T> tree, T key) {
     // assume we find key
+    // assume we find key
     Node<T> node = tree.find(key);
+    tree.splay(node);
+    node.left.parent = null;
+    node.right.parent = null;
     return Pair.of(SplayTreeWithSize.create(node.left), SplayTreeWithSize.create(node.right));
   }
 
@@ -360,12 +377,10 @@ public class SplayTreeWithSize<T extends Comparable<T>> {
       y.left = z.left;
       y.left.parent = y;
     }
-
-    size--;
   }
 
   public int size() {
-    return size;
+    return root != null ? root.size : 0;
   }
 
   public int height() {
@@ -401,12 +416,14 @@ public class SplayTreeWithSize<T extends Comparable<T>> {
 
   public void validate() {
     // root parent is null
-    if (root != null && root.parent != null) {
-      throw new RuntimeException("root parent is not null");
+    if (root != null) {
+      if (root.parent != null) {
+        throw new RuntimeException("root parent is not null");
+      }
+      root.validate();
+      validateChild(root.left);
+      validateChild(root.right);
     }
-    root.validate();
-    validateChild(root.left);
-    validateChild(root.right);
   }
 
   /**

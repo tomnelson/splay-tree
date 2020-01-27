@@ -8,8 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A splay tree for items that are not comparable. There is no 'insert' method, any new item is
- * appended to the left side of the SplayTree by first finding the 'max' (farthest right), splaying
+ * A splay tree for items that are not Comparable. There is no 'insert' method, any new item is
+ * appended to the right side of the SplayTree by first finding the 'max' (farthest right), splaying
  * to it, and adding the new Node as its right child
  *
  * @param <T>
@@ -58,8 +58,6 @@ public class InsertionOrderSplayTreeWithSize<T> {
   }
 
   Node<T> root;
-
-  //  int size;
 
   public static <T> InsertionOrderSplayTreeWithSize<T> create() {
     return new InsertionOrderSplayTreeWithSize<>();
@@ -227,7 +225,6 @@ public class InsertionOrderSplayTreeWithSize<T> {
   }
 
   public void join(InsertionOrderSplayTreeWithSize<T> joiner) {
-    //    log.info("max:{}, joiner min: {}", max().key, joiner.min().key);
     Node<T> largest = max();
     splay(largest);
     root.right = joiner.root;
@@ -266,17 +263,7 @@ public class InsertionOrderSplayTreeWithSize<T> {
           InsertionOrderSplayTreeWithSize.create(found.right);
       found.right = null;
 
-      //      if (root != null && root.parent != null) {
-      //        log.error("root has a parent");
-      //      }
-      //      this.count();
-      //      if (found.right != null && found.right.parent != null) {
-      //        log.error("found.right has a parent");
-      //      }
-      //      this.updateSize();
       validate();
-      //      splitter.count();
-      //      splitter.updateSize();
       return splitter;
     }
     return InsertionOrderSplayTreeWithSize

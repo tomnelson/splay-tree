@@ -77,7 +77,7 @@ public class TestSplayTreeWithSize {
     found = tree.find(5);
     System.err.println(tree.printTree("found " + found.key + " at " + 5));
 
-    for (int i = 0; i < tree.size; i++) {
+    for (int i = 0; i < tree.size(); i++) {
       found = tree.find(i);
       System.err.println("found " + found.key + " at " + i);
     }
@@ -85,11 +85,106 @@ public class TestSplayTreeWithSize {
     tree.splay("C");
     System.err.println(tree.printTree("Splayed C"));
 
-    for (int i = 0; i < tree.size; i++) {
+    for (int i = 0; i < tree.size(); i++) {
       found = tree.find(i);
       System.err.println("found " + found.key + " at " + i);
     }
 
     tree.validate();
+  }
+
+  @Test
+  public void testSplit() {
+    tree = SplayTreeWithSize.create();
+    for (char c = 'A'; c <= 'Z'; c++) {
+      tree.append("" + c);
+    }
+    System.err.println(tree.printTree("starting tree"));
+
+    SplayTreeWithSize<String> newTree = tree.split("M");
+    System.err.println(newTree.printTree("split off tree"));
+
+    newTree.validate();
+
+    System.err.println(tree.printTree("tree after split"));
+    tree.validate();
+
+    tree.join(newTree);
+    System.err.println(tree.printTree("Joined Tree"));
+    tree.validate();
+  }
+
+  @Test
+  public void testSplitToPair() {
+    tree = SplayTreeWithSize.create();
+    for (char c = 'A'; c <= 'Z'; c++) {
+      tree.append("" + c);
+    }
+    System.err.println(tree.printTree());
+
+    Pair<SplayTreeWithSize<String>> pair = SplayTreeWithSize.split(tree, "M");
+    System.err.println(pair.first.printTree());
+
+    pair.first.validate();
+
+    System.err.println(pair.second.printTree());
+
+    pair.second.validate();
+  }
+
+  /**
+   * create a tree of 26 upper-case characters randomly split and join the tree at different
+   * locations validate the split and re-joined tree
+   */
+  @Test
+  public void testSplits() {
+
+    tree = SplayTreeWithSize.create();
+    for (char c = 'A'; c <= 'Z'; c++) {
+      tree.append("" + c);
+    }
+    System.err.println(tree.printTree());
+    for (int i = 0; i < 20; i++) {
+      int splitPoint = (int) (Math.random() * tree.size());
+      SplayTreeWithSize<String> splitter = tree.split(splitPoint);
+      System.err.println("split at " + splitPoint);
+      System.err.println("newTree size: " + splitter.size());
+      System.err.println(splitter.printTree("split off tree"));
+
+      splitter.validate();
+      System.err.println("tree size: " + tree.size());
+      System.err.println(tree.printTree("tree after split"));
+      System.err.println(
+          "__________________________________________________________________________");
+
+      tree.validate();
+
+      tree.join(splitter);
+      System.err.println(tree.printTree("Joined Tree"));
+      tree.validate();
+    }
+
+    // also split/join at 0 and 26
+    int[] splitPoints = new int[] {0, 26};
+    for (int i : splitPoints) {
+      SplayTreeWithSize<String> splitter = tree.split(i);
+      System.err.println("split at " + i);
+      System.err.println("newTree size: " + splitter.size());
+      System.err.println(splitter.printTree("split off tree"));
+
+      splitter.validate();
+      System.err.println("tree size: " + tree.size());
+      System.err.println(tree.printTree("tree after split"));
+      System.err.println(
+          "__________________________________________________________________________");
+
+      tree.validate();
+
+      tree.join(splitter);
+      System.err.println(tree.printTree("Joined Tree"));
+      tree.validate();
+    }
+    tree.splay("A");
+    System.err.println(tree.printTree("splayed Tree"));
   }
 }
