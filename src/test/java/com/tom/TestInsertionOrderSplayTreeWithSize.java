@@ -1,5 +1,7 @@
 package com.tom;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.IntStream;
@@ -323,6 +325,30 @@ public class TestInsertionOrderSplayTreeWithSize {
     System.err.println(joined.printTree("Joined Tree"));
     joined.validate();
   }
+
+  @Test
+  public void testSplitsAtKeys() {
+    List<String> chars = new ArrayList<>();
+    for (char c = 'A'; c <= 'Z'; c++) {
+      String s = Character.toString(c);
+      chars.add(s);
+    }
+    for (String key : new String[]{"V","A","G","Z"}) {
+
+      tree = InsertionOrderSplayTreeWithSize.create();
+      chars.forEach(tree::append);
+      System.err.println(tree.printTree("starting tree"));
+
+      Pair<InsertionOrderSplayTreeWithSize<String>> pair =
+              InsertionOrderSplayTreeWithSize.split(tree, key);
+
+      System.err.println(pair.first.printTree("first split off tree"));
+      System.err.println(pair.second.printTree("second split off tree"));
+      pair.first.validate();
+      pair.second.validate();
+    }
+  }
+
 
   // Implementing Fisher–Yates shuffle
   static void shuffleArray(int[] ar) {
