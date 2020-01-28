@@ -246,7 +246,7 @@ public class InsertionOrderSplayTreeWithSize<T> {
         joiner.root.parent = root;
       }
     } else {
-      System.err.println("joiner root is null");
+      root = joiner.root;
     }
   }
 
