@@ -64,7 +64,9 @@ public class InsertionOrderSplayTreeWithSize<T> {
   }
 
   public static <T> InsertionOrderSplayTreeWithSize<T> create(Node<T> root) {
-    return new InsertionOrderSplayTreeWithSize<>(root);
+    InsertionOrderSplayTreeWithSize<T> tree = new InsertionOrderSplayTreeWithSize<>(root);
+    tree.validate();
+    return tree;
   }
 
   private InsertionOrderSplayTreeWithSize() {}
@@ -116,6 +118,9 @@ public class InsertionOrderSplayTreeWithSize<T> {
   }
 
   public void splay(Node<T> x) {
+    if (x == null) {
+      return;
+    }
     int rootSize = nodeSize(root);
     int leftSize = 0;
     int rightSize = 0;
@@ -142,10 +147,11 @@ public class InsertionOrderSplayTreeWithSize<T> {
     leftSize += nodeSize(root.left); /* Now l_size and r_size are the sizes of */
     rightSize += nodeSize(root.right); /* the left and right trees we just built.*/
     root.size = leftSize + rightSize + 1;
+    validate();
   }
 
   static <T> Node<T> p(Node<T> node) {
-    return node.parent;
+    return node != null ? node.parent : node;
   }
 
   static <T> int size(Node<T> node) {
@@ -153,11 +159,11 @@ public class InsertionOrderSplayTreeWithSize<T> {
   }
 
   static <T> Node<T> l(Node<T> node) {
-    return node.left;
+    return node != null ? node.left : node;
   }
 
   static <T> Node<T> r(Node<T> node) {
-    return node.right;
+    return node != null ? node.right : node;
   }
 
   public int pos(Node<T> node) {
@@ -190,11 +196,19 @@ public class InsertionOrderSplayTreeWithSize<T> {
   }
 
   public Node<T> max() {
-    return subtree_maximum(root);
+    if (root != null) {
+      return subtree_maximum(root);
+    } else {
+      return null;
+    }
   }
 
   public Node<T> min() {
-    return subtree_minimum(root);
+    if (root != null) {
+      return subtree_minimum(root);
+    } else {
+      return null;
+    }
   }
 
   public void append(T key) {
@@ -216,12 +230,20 @@ public class InsertionOrderSplayTreeWithSize<T> {
     //    size++;
   }
 
-  public static <T extends Comparable<T>> void join(
+  public static <T> InsertionOrderSplayTreeWithSize<T> join(
       Pair<InsertionOrderSplayTreeWithSize<T>> trees) {
     // find my largest item
     Node<T> largest = trees.first.max();
-    trees.first.splay(largest);
-    trees.first.root.right = trees.second.root;
+    if (largest != null) {
+      trees.first.splay(largest);
+      trees.first.root.right = trees.second.root;
+      if (trees.second.root != null) {
+        trees.second.root.parent = trees.first.root;
+      }
+      return trees.first;
+    } else {
+      return trees.second;
+    }
   }
 
   public void join(InsertionOrderSplayTreeWithSize<T> joiner) {
@@ -288,7 +310,7 @@ public class InsertionOrderSplayTreeWithSize<T> {
     }
   }
 
-  public static <T extends Comparable<T>> Pair<InsertionOrderSplayTreeWithSize<T>> split(
+  public static <T> Pair<InsertionOrderSplayTreeWithSize<T>> split(
       InsertionOrderSplayTreeWithSize<T> tree, T key) {
     // assume we find key
     Node<T> node = tree.find(key);
@@ -298,6 +320,28 @@ public class InsertionOrderSplayTreeWithSize<T> {
     return Pair.of(
         InsertionOrderSplayTreeWithSize.create(node.left),
         InsertionOrderSplayTreeWithSize.create(node.right));
+  }
+
+  public static <T> Pair<InsertionOrderSplayTreeWithSize<T>> split(
+      InsertionOrderSplayTreeWithSize<T> tree, int position) {
+    // assume we find key
+    Node<T> node = tree.find(position);
+    if (node != null) {
+      tree.splay(node);
+      System.err.println(tree.printTree("after splay at " + node));
+      if (node.left != null) node.left.parent = null;
+      if (node.right != null) node.right.parent = null;
+      InsertionOrderSplayTreeWithSize<T> left = InsertionOrderSplayTreeWithSize.create(node.left);
+      left.validate();
+      InsertionOrderSplayTreeWithSize<T> right = InsertionOrderSplayTreeWithSize.create(node.right);
+      right.validate();
+      return Pair.of(left, right);
+    } else {
+      tree.validate();
+      InsertionOrderSplayTreeWithSize<T> empty = InsertionOrderSplayTreeWithSize.create();
+      empty.validate();
+      return Pair.of(tree, empty);
+    }
   }
 
   public Node<T> find(Node<T> node) {
@@ -375,9 +419,29 @@ public class InsertionOrderSplayTreeWithSize<T> {
     return node != null ? 1 + Math.max(height(node.left), height(node.right)) : 0;
   }
 
-  static <T extends Comparable> boolean comp(T one, T two) {
-    return one.compareTo(two) < 0;
+  public boolean contains(Node<T> element) {
+    return contains(root, element);
   }
+
+  private boolean contains(Node<T> from, Node<T> segment) {
+    if (from == null) return false;
+    if (from == segment) return true;
+    return contains(from.left, segment) || contains(from.right, segment);
+  }
+
+  public boolean contains(T value) {
+    return contains(root, value);
+  }
+
+  private boolean contains(Node<T> from, T value) {
+    if (from == null) return false;
+    if (from.key == value) return true;
+    return contains(from.left, value) || contains(from.right, value);
+  }
+
+  //  static <T extends Comparable> boolean comp(T one, T two) {
+  //    return one.compareTo(two) < 0;
+  //  }
 
   public String printTree() {
     return printTree(root, 0);
@@ -399,14 +463,16 @@ public class InsertionOrderSplayTreeWithSize<T> {
   }
 
   public void validate() {
-    // root parent is null
-    if (root != null) {
-      if (root.parent != null) {
-        throw new RuntimeException("root parent is not null");
+    if (log.isTraceEnabled()) {
+      // root parent is null
+      if (root != null) {
+        if (root.parent != null) {
+          throw new RuntimeException("root parent is not null");
+        }
+        root.validate();
+        validateChild(root.left);
+        validateChild(root.right);
       }
-      root.validate();
-      validateChild(root.left);
-      validateChild(root.right);
     }
   }
 
@@ -414,22 +480,15 @@ public class InsertionOrderSplayTreeWithSize<T> {
     if (node != null) {
       node.validate();
       if (node.parent == null) {
-        throw new RuntimeException("child has null parent");
+        throw new RuntimeException("child " + node.key + " has null parent");
       }
       if (node.size != node.count()) {
-        throw new RuntimeException("size does not match count");
+        throw new RuntimeException("size of " + node.key + " does not match count");
       }
       validateChild(node.left);
       validateChild(node.right);
     }
   }
-
-  //  void updateSize() {
-  //    size = 0;
-  //    for (TreeIterator<T> iterator = new TreeIterator<>(root); iterator.hasNext(); iterator.next()) {
-  //      size++;
-  //    }
-  //  }
 
   public static class TreeIterator<V> implements Iterator<Node<V>> {
     @Override

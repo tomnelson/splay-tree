@@ -169,6 +169,161 @@ public class TestInsertionOrderSplayTreeWithSize {
     }
   }
 
+  @Test
+  public void testStaticSplits() {
+
+    tree = InsertionOrderSplayTreeWithSize.create();
+    for (char c = 'A'; c <= 'Z'; c++) {
+      tree.append("" + c);
+    }
+    System.err.println(tree.printTree());
+    tree.validate();
+
+    for (int splitPoint : shuffledInts(0, tree.size())) {
+      tree.validate();
+      Pair<InsertionOrderSplayTreeWithSize<String>> pair =
+          InsertionOrderSplayTreeWithSize.split(tree, splitPoint);
+      System.err.println("split at " + splitPoint);
+
+      InsertionOrderSplayTreeWithSize<String> left = pair.first;
+      InsertionOrderSplayTreeWithSize<String> right = pair.second;
+      System.err.println("left size: " + left.size());
+      System.err.println("right size: " + right.size());
+      System.err.println(left.printTree("split off tree"));
+      System.err.println(right.printTree("split off tree"));
+
+      left.validate();
+      right.validate();
+      System.err.println(
+          "__________________________________________________________________________");
+
+      InsertionOrderSplayTreeWithSize<String> joined = InsertionOrderSplayTreeWithSize.join(pair);
+      System.err.println(joined.printTree("Joined Tree"));
+      joined.validate();
+      tree = joined;
+    }
+  }
+
+  @Test
+  public void testStaticSplitAtZero() {
+
+    tree = InsertionOrderSplayTreeWithSize.create();
+    for (char c = 'A'; c <= 'Z'; c++) {
+      tree.append("" + c);
+    }
+    System.err.println(tree.printTree());
+
+    Pair<InsertionOrderSplayTreeWithSize<String>> pair =
+        InsertionOrderSplayTreeWithSize.split(tree, 0);
+    System.err.println("split at " + 0);
+
+    InsertionOrderSplayTreeWithSize<String> left = pair.first;
+    InsertionOrderSplayTreeWithSize<String> right = pair.second;
+    System.err.println("left size: " + left.size());
+    System.err.println("right size: " + right.size());
+    System.err.println(left.printTree("split off tree"));
+    System.err.println(right.printTree("split off tree"));
+
+    left.validate();
+    right.validate();
+    System.err.println(
+        "__________________________________________________________________________");
+
+    InsertionOrderSplayTreeWithSize<String> joined = InsertionOrderSplayTreeWithSize.join(pair);
+    System.err.println(joined.printTree("Joined Tree"));
+    joined.validate();
+  }
+
+  @Test
+  public void testStaticSplitAtTop() {
+
+    tree = InsertionOrderSplayTreeWithSize.create();
+    for (char c = 'A'; c <= 'Z'; c++) {
+      tree.append("" + c);
+    }
+    System.err.println(tree.printTree());
+
+    Pair<InsertionOrderSplayTreeWithSize<String>> pair =
+        InsertionOrderSplayTreeWithSize.split(tree, tree.size());
+    System.err.println("split at " + tree.size());
+
+    InsertionOrderSplayTreeWithSize<String> left = pair.first;
+    InsertionOrderSplayTreeWithSize<String> right = pair.second;
+    System.err.println("left size: " + left.size());
+    System.err.println("right size: " + right.size());
+    System.err.println(left.printTree("split off tree"));
+    System.err.println(right.printTree("split off tree"));
+
+    left.validate();
+    right.validate();
+    System.err.println(
+        "__________________________________________________________________________");
+
+    InsertionOrderSplayTreeWithSize<String> joined = InsertionOrderSplayTreeWithSize.join(pair);
+    System.err.println(joined.printTree("Joined Tree"));
+    joined.validate();
+  }
+
+  @Test
+  public void testStaticSplitAtOverTop() {
+
+    tree = InsertionOrderSplayTreeWithSize.create();
+    for (char c = 'A'; c <= 'Z'; c++) {
+      tree.append("" + c);
+    }
+    System.err.println(tree.printTree());
+
+    Pair<InsertionOrderSplayTreeWithSize<String>> pair =
+        InsertionOrderSplayTreeWithSize.split(tree, tree.size() + 10);
+    System.err.println("split at " + tree.size() + 10);
+
+    InsertionOrderSplayTreeWithSize<String> left = pair.first;
+    InsertionOrderSplayTreeWithSize<String> right = pair.second;
+    System.err.println("left size: " + left.size());
+    System.err.println("right size: " + right.size());
+    System.err.println(left.printTree("split off tree"));
+    System.err.println(right.printTree("split off tree"));
+
+    left.validate();
+    right.validate();
+    System.err.println(
+        "__________________________________________________________________________");
+
+    InsertionOrderSplayTreeWithSize<String> joined = InsertionOrderSplayTreeWithSize.join(pair);
+    System.err.println(joined.printTree("Joined Tree"));
+    joined.validate();
+  }
+
+  @Test
+  public void testStaticSplitAtNegative() {
+
+    tree = InsertionOrderSplayTreeWithSize.create();
+    for (char c = 'A'; c <= 'Z'; c++) {
+      tree.append("" + c);
+    }
+    System.err.println(tree.printTree());
+
+    Pair<InsertionOrderSplayTreeWithSize<String>> pair =
+        InsertionOrderSplayTreeWithSize.split(tree, -10);
+    System.err.println("split at " + -10);
+
+    InsertionOrderSplayTreeWithSize<String> left = pair.first;
+    InsertionOrderSplayTreeWithSize<String> right = pair.second;
+    System.err.println("left size: " + left.size());
+    System.err.println("right size: " + right.size());
+    System.err.println(left.printTree("split off tree"));
+    System.err.println(right.printTree("split off tree"));
+
+    left.validate();
+    right.validate();
+    System.err.println(
+        "__________________________________________________________________________");
+
+    InsertionOrderSplayTreeWithSize<String> joined = InsertionOrderSplayTreeWithSize.join(pair);
+    System.err.println(joined.printTree("Joined Tree"));
+    joined.validate();
+  }
+
   // Implementing Fisher–Yates shuffle
   static void shuffleArray(int[] ar) {
     Random rnd = ThreadLocalRandom.current();
