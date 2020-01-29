@@ -233,7 +233,7 @@ public class InsertionOrderSplayTreeWithSize<T> {
   public static <T> InsertionOrderSplayTreeWithSize<T> join(
       Pair<InsertionOrderSplayTreeWithSize<T>> trees) {
     trees.first.join(trees.second);
-     return trees.first;
+    return trees.first;
   }
 
   public void join(InsertionOrderSplayTreeWithSize<T> joiner) {
@@ -269,8 +269,9 @@ public class InsertionOrderSplayTreeWithSize<T> {
   }
 
   /**
-   * find key, make it the root, left children go in first tree, right children
-   * go in second tree. key is not in either tree
+   * find key, make it the root, left children go in first tree, right children go in second tree.
+   * key is not in either tree
+   *
    * @param tree
    * @param key
    * @param <T>
@@ -286,7 +287,7 @@ public class InsertionOrderSplayTreeWithSize<T> {
     // split off the right side of key
     Node<T> node = find(key);
     if (node != null) {
-      splay(node);// so node will be root
+      splay(node); // so node will be root
       System.err.println(printTree());
       node.size -= size(node.right);
       // root should be the found node
@@ -298,7 +299,7 @@ public class InsertionOrderSplayTreeWithSize<T> {
       root = node.left;
 
       InsertionOrderSplayTreeWithSize<T> splitter =
-              InsertionOrderSplayTreeWithSize.create(node.right);
+          InsertionOrderSplayTreeWithSize.create(node.right);
 
       // found should not be in either tree
       splitter.validate();
@@ -310,8 +311,8 @@ public class InsertionOrderSplayTreeWithSize<T> {
   }
 
   /**
-   * first position elements go in left tree, the rest go in right tree.
-   * No elements are missin
+   * first position elements go in left tree, the rest go in right tree. No elements are missin
+   *
    * @param tree
    * @param position
    * @param <T>
@@ -320,8 +321,7 @@ public class InsertionOrderSplayTreeWithSize<T> {
   public static <T> Pair<InsertionOrderSplayTreeWithSize<T>> split(
       InsertionOrderSplayTreeWithSize<T> tree, int position) {
 
-    InsertionOrderSplayTreeWithSize<T> right =
-            tree.split(position);
+    InsertionOrderSplayTreeWithSize<T> right = tree.split(position);
 
     return Pair.of(tree, right);
   }
@@ -336,20 +336,20 @@ public class InsertionOrderSplayTreeWithSize<T> {
         found.size -= found.right.size;
       }
       InsertionOrderSplayTreeWithSize<T> splitter =
-              InsertionOrderSplayTreeWithSize.create(found.right);
+          InsertionOrderSplayTreeWithSize.create(found.right);
       found.right = null;
       splitter.validate();
       validate();
       // make sure that 'found' is still in this tree.
       if (find(found) == null) {
-        throw new RuntimeException("Node "+found+" at position "+position+" was not still in tree");
+        throw new RuntimeException(
+            "Node " + found + " at position " + position + " was not still in tree");
       }
       return splitter;
     }
     return InsertionOrderSplayTreeWithSize
-            .create(); // return empty 'right' tree and leave tree alone
+        .create(); // return empty 'right' tree and leave tree alone
   }
-
 
   public Node<T> find(Node<T> node) {
     return find(root, node);

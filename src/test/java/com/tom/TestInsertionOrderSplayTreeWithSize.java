@@ -333,14 +333,14 @@ public class TestInsertionOrderSplayTreeWithSize {
       String s = Character.toString(c);
       chars.add(s);
     }
-    for (String key : new String[]{"V","A","G","Z"}) {
+    for (String key : new String[] {"V", "A", "G", "Z"}) {
 
       tree = InsertionOrderSplayTreeWithSize.create();
       chars.forEach(tree::append);
       System.err.println(tree.printTree("starting tree"));
 
       Pair<InsertionOrderSplayTreeWithSize<String>> pair =
-              InsertionOrderSplayTreeWithSize.split(tree, key);
+          InsertionOrderSplayTreeWithSize.split(tree, key);
 
       System.err.println(pair.first.printTree("first split off tree"));
       System.err.println(pair.second.printTree("second split off tree"));
@@ -348,7 +348,6 @@ public class TestInsertionOrderSplayTreeWithSize {
       pair.second.validate();
     }
   }
-
 
   // Implementing Fisher–Yates shuffle
   static void shuffleArray(int[] ar) {
