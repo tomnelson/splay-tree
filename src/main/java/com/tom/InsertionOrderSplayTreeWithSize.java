@@ -1,6 +1,5 @@
 package com.tom;
 
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.NoSuchElementException;
 import java.util.Set;
@@ -12,7 +11,7 @@ import org.slf4j.LoggerFactory;
  * appended to the right side of the SplayTree by first finding the 'max' (farthest right), splaying
  * to it, and adding the new Node as its right child
  *
- * @param <T>
+ * @param <T> key type that is stored in the tree
  */
 public class InsertionOrderSplayTreeWithSize<T> {
 
@@ -27,7 +26,7 @@ public class InsertionOrderSplayTreeWithSize<T> {
     Node<T> parent;
     Node<T> left;
     Node<T> right;
-    int size;
+    int size = 1;
 
     public Node(T key) {
       this.key = key;
@@ -121,7 +120,6 @@ public class InsertionOrderSplayTreeWithSize<T> {
     if (x == null) {
       return;
     }
-    int rootSize = nodeSize(root);
     int leftSize = 0;
     int rightSize = 0;
 
@@ -221,13 +219,9 @@ public class InsertionOrderSplayTreeWithSize<T> {
     Node<T> max = max();
     splay(max);
 
-    //    System.err.println(printTree("Appending " + key));
-
     max.right = z;
     max.size += z.size;
     z.parent = max;
-    //    System.err.println(printTree("Appended " + key));
-    //    size++;
   }
 
   public static <T> InsertionOrderSplayTreeWithSize<T> join(
@@ -410,8 +404,6 @@ public class InsertionOrderSplayTreeWithSize<T> {
       y.left = z.left;
       y.left.parent = y;
     }
-
-    //    size--;
   }
 
   public int size() {
@@ -445,10 +437,6 @@ public class InsertionOrderSplayTreeWithSize<T> {
     if (from.key == value) return true;
     return contains(from.left, value) || contains(from.right, value);
   }
-
-  //  static <T extends Comparable> boolean comp(T one, T two) {
-  //    return one.compareTo(two) < 0;
-  //  }
 
   public String printTree() {
     return printTree(root, 0);
@@ -497,14 +485,12 @@ public class InsertionOrderSplayTreeWithSize<T> {
     }
   }
 
-  public static class TreeIterator<V> implements Iterator<Node<V>> {
-    @Override
-    public void remove() {}
+  public static class Iterator<V> implements java.util.Iterator<Node<V>> {
 
     private Node<V> next;
     Set<Node<V>> elements = new LinkedHashSet<>();
 
-    public TreeIterator(Node<V> root) {
+    public Iterator(Node<V> root) {
       this.next = root;
       if (next == null) return;
 

@@ -349,6 +349,25 @@ public class TestInsertionOrderSplayTreeWithSize {
     }
   }
 
+  @Test
+  public void joinWithEmptyTree() {
+    tree = InsertionOrderSplayTreeWithSize.create();
+
+    InsertionOrderSplayTreeWithSize<String> joiner =
+        InsertionOrderSplayTreeWithSize.create(new InsertionOrderSplayTreeWithSize.Node("Z"));
+
+    tree.join(joiner);
+
+    System.err.println(joiner.printTree());
+
+    InsertionOrderSplayTreeWithSize<String> next =
+        InsertionOrderSplayTreeWithSize.create(new InsertionOrderSplayTreeWithSize.Node<>("A"));
+    InsertionOrderSplayTreeWithSize.join(Pair.of(tree, next));
+    System.err.println(tree.printTree());
+    tree.splay("A");
+    System.err.println(tree.printTree());
+  }
+
   // Implementing Fisher–Yates shuffle
   static void shuffleArray(int[] ar) {
     Random rnd = ThreadLocalRandom.current();
