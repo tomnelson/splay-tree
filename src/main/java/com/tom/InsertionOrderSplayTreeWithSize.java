@@ -534,4 +534,14 @@ public class InsertionOrderSplayTreeWithSize<T> {
       }
     }
   }
+
+  public String toString() {
+    StringBuilder buf = new StringBuilder();
+    for (Iterator<T> iterator = new Iterator(root); iterator.hasNext(); ) {
+      Node<T> node = iterator.next();
+      buf.append(node.toString());
+      buf.append("\n");
+    }
+    return buf.toString();
+  }
 }
